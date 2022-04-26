@@ -1,8 +1,6 @@
 import datetime
 import os
 import threading
-import time
-
 import schedule
 import telebot
 from telebot import types
@@ -55,7 +53,8 @@ def main():
         c = telebot.types.InlineKeyboardButton(text="О Olympobot", callback_data="about")
         z = telebot.types.InlineKeyboardButton(text="Полезные материалы", callback_data="materials")
         d = telebot.types.InlineKeyboardButton(text="Оставить отзыв", callback_data="review")
-        kb.add(a, b, c, z, d)
+        m = telebot.types.InlineKeyboardButton(text="Мой профиль", callback_data="profile")
+        kb.add(a, b, c, z, d, m)
         if not is_callback:
             bot.send_message(message.chat.id, "Выберите действие", reply_markup=kb)
         else:
@@ -80,9 +79,15 @@ def main():
         g = telebot.types.InlineKeyboardButton(text="В меню", callback_data="menu")
         kb.add(a, b, c, d, e, g)
         if not is_callback:
-            bot.send_message(message.chat.id, f"На данный момент рейтинг {round(summ / count, 2)}")
+            your_mark = db_sess.query(Review).filter(Review.user_id == message.chat.id).first().mark
+            if your_mark:
+                bot.send_message(message.chat.id, f"Вы оценили бота на {your_mark}")
+            bot.send_message(message.chat.id, f"На данный момент средняя оценка {round(summ / count, 2)}")
             bot.send_message(message.chat.id, "Пожалуйста, оцените нашего бота", reply_markup=kb)
         else:
+            your_mark = db_sess.query(Review).filter(Review.user_id == message).first().mark
+            if your_mark:
+                bot.send_message(message, f"Вы оценили бота на {your_mark}")
             bot.send_message(message, f"На данный момент рейтинг {round(summ / count, 2)}")
             bot.send_message(message, "Пожалуйста, оцените нашего бота", reply_markup=kb)
 
@@ -107,7 +112,7 @@ def main():
         kb = telebot.types.InlineKeyboardMarkup()
         c = types.InlineKeyboardButton(text="В меню", callback_data='menu')
         kb.add(c)
-        bot.send_message(message.chat.id, data.about_bot, reply_markup=kb)
+        bot.send_message(message.chat.id, data.help_text, reply_markup=kb)
 
     @bot.callback_query_handler(func=lambda call: True)  # Обработчик коллбэков от функции menu_func
     def callback_func(callback):
@@ -254,7 +259,8 @@ def main():
             db_sess = db_session.create_session()
             obj = db_sess.query(Review).filter(Review.user_id == callback.from_user.id).first()
             if '2' not in str(obj.olimp_list).split(';'):
-                e = telebot.types.InlineKeyboardButton(text="Установить напоминание", callback_data="add_timer_lomonosov")
+                e = telebot.types.InlineKeyboardButton(text="Установить напоминание",
+                                                       callback_data="add_timer_lomonosov")
             else:
                 e = telebot.types.InlineKeyboardButton(text="Удалить напоминание", callback_data="del_timer_lomonosov")
             db_sess.close()
@@ -1009,14 +1015,6 @@ def main():
             file = open('exerсise/exercise_gercen.rar', 'rb')
             bot.send_document(callback.from_user.id, file)
             file.close()
-        #
-        # elif callback.data == 'timer_veshka':
-        #     kb = telebot.types.InlineKeyboardMarkup(row_width=1)
-        #     b = telebot.types.InlineKeyboardButton(text="Установить напоминание", callback_data="exercises_gercen")
-        #     c = types.InlineKeyboardButton(text="Сайт олимпиады", url=data.site_gercen)
-        #     d = telebot.types.InlineKeyboardButton(text="К списку олимпиад", callback_data="perech")
-        #     kb.add(b, c, d)
-        #     bot.send_message(callback.from_user.id, data.about_gercen, reply_markup=kb)
 
         elif callback.data == "mark_5":
             user_id = callback.from_user.id
@@ -1119,6 +1117,28 @@ def main():
             kb.add(b)
             bot.send_message(callback.from_user.id, data.about_bot, reply_markup=kb)
 
+        elif callback.data == 'profile':
+            kb = telebot.types.InlineKeyboardMarkup(row_width=1)
+            b = telebot.types.InlineKeyboardButton(text="В меню", callback_data="menu")
+            kb.add(b)
+            db_sess = db_session.create_session()
+            obj = db_sess.query(Review).filter(Review.user_id == callback.from_user.id).first()
+            name = obj.first_name
+            nickname = obj.nickname
+            user_id = callback.from_user.id
+            ols_list = []
+            for i in obj.olimp_list.split(';')[1:]:
+                olymp = db_sess.query(Period).filter(Period.olimpiad_id == int(i)).first()
+                ols_list.append(olymp.olimpiad_name)
+            if not ols_list:
+                ols_list = ['напоминание не включены']
+            message = f'Ваше имя: {name}\n' \
+                      f'Ваш ник: {nickname}\n' \
+                      f'Ваш id: {user_id}\n' \
+                      f'Включено напоминание о следующих олимпиадах: {", ".join(ols_list)}'
+            bot.send_message(user_id, message, reply_markup=kb)
+            db_sess.close()
+
         elif callback.data == 'stats':
             db_sess = db_session.create_session()
             summ = 0
@@ -1154,7 +1174,6 @@ def main():
                 bot.send_document(callback.from_user.id, to_send)
             os.remove('db.txt')
 
-
         elif callback.data == 'bd_stats':
             with open('db//database.db') as file:
                 bot.send_document(callback.from_user.id, file)
@@ -1167,16 +1186,40 @@ def main():
 
 
 def schedule_func():
-    # print(threading.active_count())
-    schedule.every(5).seconds.do(printer)
+    # schedule.every(5).seconds.do(printer)
+    schedule.every().day.at("07:00").do(printer)
     while True:
         schedule.run_pending()
+
+
+def sender(bot, users, message):
+    for i in users:
+        try:
+            bot.send_message(i, message)
+        except Exception:
+            pass
 
 
 def printer():
     bot = telebot.TeleBot(token)
     db_sess = db_session.create_session()
-    # bot.send_message(1313073986, 'Привет')
+    year_now, month_now, day_now = str(datetime.date.today().year), str(datetime.date.today().month), str(
+        datetime.date.today().day)
+    for i in db_sess.query(Period):
+        if i.first_tour:
+            year, month, day = i.first_tour.split('-')
+            if year == year_now and month == month_now and day == day_now:
+                sender(bot, i.list_of_users.split(';'), f'Сегодня тур по олимпиаде "{i.olimpiad_name}", желаю удачи!')
+        if i.date_per_week:
+            year, month, day = i.date_per_week.split('-')
+            if year == year_now and month == month_now and day == day_now:
+                sender(bot, i.list_of_users.split(';'),
+                       f'Через неделю начинается тур по олимпиаде "{i.olimpiad_name}"!')
+        if i.date_per_day:
+            year, month, day = i.date_per_day.split('-')
+            if year == year_now and month == month_now and day == day_now:
+                sender(bot, i.list_of_users.split(';'),
+                       f'Завтра начинается тур по олимпиаде "{i.olimpiad_name}"!')
 
 
 if __name__ == '__main__':

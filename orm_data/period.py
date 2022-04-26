@@ -11,7 +11,8 @@ class Period(SqlAlchemyBase):
     olimpiad_id = sqlalchemy.Column(sqlalchemy.Integer)
     olimpiad_name = sqlalchemy.Column(sqlalchemy.String)
     first_tour = sqlalchemy.Column(sqlalchemy.String)
-    time_to_remind = sqlalchemy.Column(sqlalchemy.String)
+    date_per_week = sqlalchemy.Column(sqlalchemy.String)
+    date_per_day = sqlalchemy.Column(sqlalchemy.String)
     list_of_users = sqlalchemy.Column(sqlalchemy.String)
 
     def __repr__(self):
