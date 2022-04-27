@@ -1,0 +1,3 @@
+schedule
+PyTelegramBotAPI
+sqlalchemy

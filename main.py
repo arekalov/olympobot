@@ -437,7 +437,7 @@ def main():
             text = obj.olimp_list
             users = ol_obj.list_of_users
             if not ol_id in str(text).split(';'):
-                obj.olimp_list = text + f';{ol_id}'
+                obj.olimp_list = str(text) + f';{ol_id}'
                 bot.send_message(callback.from_user.id, data.timer_info_add)
             else:
                 bot.send_message(callback.from_user.id, 'Напоминания уже включены')
@@ -957,62 +957,62 @@ def main():
 
         elif callback.data == "exercises_vsosh":
             bot.send_message(callback.from_user.id, 'Подождите немного')
-            file = open('exerсise/exercise_vsosh.rar', 'rb')
+            file = open('exerсise/exercise_vsosh.zip', 'rb')
             bot.send_document(callback.from_user.id, file)
         elif callback.data == "exercises_veshka":
-            file = open('exerсise/exercise_veshka.rar', 'rb')
+            file = open('exerсise/exercise_veshka.zip', 'rb')
             bot.send_document(callback.from_user.id, file)
             file.close()
         elif callback.data == "exercises_lomonosov":
-            file = open('exerсise/exercise_lomonosov.rar', 'rb')
+            file = open('exerсise/exercise_lomonosov.zip', 'rb')
             bot.send_document(callback.from_user.id, file)
             file.close()
         elif callback.data == "exercises_vorov":
-            file = open('exerсise/exercise_vorov.rar', 'rb')
+            file = open('exerсise/exercise_vorov.zip', 'rb')
             bot.send_document(callback.from_user.id, file)
             file.close()
         elif callback.data == "exercises_spbgu":
-            file = open('exerсise/exercise_spbgu.rar', 'rb')
+            file = open('exerсise/exercise_spbgu.zip', 'rb')
             bot.send_document(callback.from_user.id, file)
             file.close()
         elif callback.data == "exercises_ranh":
-            file = open('exerсise/exercise_ranh.rar', 'rb')
+            file = open('exerсise/exercise_ranh.zip', 'rb')
             bot.send_document(callback.from_user.id, file)
             file.close()
         elif callback.data == "exercises_plehan":
-            file = open('exerсise/exercise_plehan.rar', 'rb')
+            file = open('exerсise/exercise_plehan.zip', 'rb')
             bot.send_document(callback.from_user.id, file)
             file.close()
         elif callback.data == "exercises_evra":
-            file = open('exerсise/exercise_evra.rar', 'rb')
+            file = open('exerсise/exercise_evra.zip', 'rb')
             bot.send_document(callback.from_user.id, file)
             file.close()
         elif callback.data == "exercises_kfu":
-            file = open('exerсise/exercise_kfu.rar', 'rb')
+            file = open('exerсise/exercise_kfu.zip', 'rb')
             bot.send_document(callback.from_user.id, file)
             file.close()
         elif callback.data == "exercises_rggu":
-            file = open('exerсise/exercise_rggu.rar', 'rb')
+            file = open('exerсise/exercise_rggu.zip', 'rb')
             bot.send_document(callback.from_user.id, file)
             file.close()
         elif callback.data == "exercises_vedom":
-            file = open('exerсise/exercise_vedom.rar', 'rb')
+            file = open('exerсise/exercise_vedom.zip', 'rb')
             bot.send_document(callback.from_user.id, file)
             file.close()
         elif callback.data == "exercises_chell":
-            file = open('exerсise/exercise_chell.rar', 'rb')
+            file = open('exerсise/exercise_chell.zip', 'rb')
             bot.send_document(callback.from_user.id, file)
             file.close()
         elif callback.data == "exercises_uchit":
-            file = open('exerсise/exercise_uchit.rar', 'rb')
+            file = open('exerсise/exercise_uchit.zip', 'rb')
             bot.send_document(callback.from_user.id, file)
             file.close()
         elif callback.data == "exercises_formula":
-            file = open('exerсise/exercise_formula.rar', 'rb')
+            file = open('exerсise/exercise_formula.zip', 'rb')
             bot.send_document(callback.from_user.id, file)
             file.close()
         elif callback.data == "exercises_gercen":
-            file = open('exerсise/exercise_gercen.rar', 'rb')
+            file = open('exerсise/exercise_gercen.zip', 'rb')
             bot.send_document(callback.from_user.id, file)
             file.close()
 
@@ -1182,7 +1182,7 @@ def main():
     def trash_func(message):
         bot.send_message(message.chat.id, 'Простите, не понимаю вас')
 
-    bot.polling(none_stop=True, interval=0)
+    bot.polling(none_stop=True, interval=0, timeout=1)
 
 
 def schedule_func():
